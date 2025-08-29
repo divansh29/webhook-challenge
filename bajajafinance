@@ -1,0 +1,387 @@
+<!-- pom.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+    <groupId>com.example</groupId>
+    <artifactId>webhook-challenge</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>webhook-challenge</name>
+    <description>Demo project for Spring Boot Webhook Challenge</description>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```properties
+# src/main/resources/application.properties
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.defer-datasource-initialization=true
+```sql
+-- src/main/resources/schema.sql
+DROP TABLE IF EXISTS PAYMENTS;
+DROP TABLE IF EXISTS EMPLOYEE;
+DROP TABLE IF EXISTS DEPARTMENT;
+
+CREATE TABLE DEPARTMENT (
+    DEPARTMENT_ID INT PRIMARY KEY,
+    DEPARTMENT_NAME VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE EMPLOYEE (
+    EMP_ID INT PRIMARY KEY,
+    FIRST_NAME VARCHAR(255),
+    "LAST NAME" VARCHAR(255),
+    DOB DATE,
+    GENDER VARCHAR(50),
+    "DEPARTMEN T" INT,
+    FOREIGN KEY ("DEPARTMEN T") REFERENCES DEPARTMENT(DEPARTMENT_ID)
+);
+
+CREATE TABLE PAYMENTS (
+    PAYMENT_ID INT PRIMARY KEY,
+    EMP_ID INT,
+    AMOUNT DECIMAL(10, 2),
+    PAYMENT_TIME TIMESTAMP,
+    FOREIGN KEY (EMP_ID) REFERENCES EMPLOYEE(EMP_ID)
+);
+```sql
+-- src/main/resources/data.sql
+INSERT INTO DEPARTMENT (DEPARTMENT_ID, DEPARTMENT_NAME) VALUES
+(1, 'HR'),
+(2, 'Finance'),
+(3, 'Engineering'),
+(4, 'Sales'),
+(5, 'Marketing'),
+(6, 'IT');
+
+INSERT INTO EMPLOYEE (EMP_ID, FIRST_NAME, "LAST NAME", DOB, GENDER, "DEPARTMEN T") VALUES
+(1, 'John', 'Williams', '1980-05-15', 'Male', 3),
+(2, 'Sarah', 'Johnson', '1990-07-20', 'Female', 2),
+(3, 'Michael', 'Smith', '1985-02-10', 'Male', 3),
+(4, 'Emily', 'Brown', '1992-11-30', 'Female', 4),
+(5, 'David', 'Jones', '1988-09-05', 'Male', 5),
+(6, 'Olivia', 'Davis', '1995-04-12', 'Female', 1),
+(7, 'James', 'Wilson', '1983-03-25', 'Male', 6),
+(8, 'Sophia', 'Anderson', '1991-08-17', 'Female', 4),
+(9, 'Liam', 'Miller', '1979-12-01', 'Male', 1),
+(10, 'Emma', 'Taylor', '1993-06-28', 'Female', 5);
+
+INSERT INTO PAYMENTS (PAYMENT_ID, EMP_ID, AMOUNT, PAYMENT_TIME) VALUES
+(1, 2, 65784.00, '2025-01-01 13:44:12.824'),
+(2, 4, 62736.00, '2025-01-06 18:36:37.892'),
+(3, 1, 69437.00, '2025-01-01 10:19:21.563'),
+(4, 3, 67183.00, '2025-01-02 17:21:57.341'),
+(5, 2, 66273.00, '2025-02-01 11:49:15.764'),
+(6, 5, 71475.00, '2025-01-01 07:24:14.453'),
+(7, 1, 70837.00, '2025-02-03 19:11:31.553'),
+(8, 6, 69628.00, '2025-01-02 10:41:15.113'),
+(9, 4, 71876.00, '2025-02-01 12:16:47.807'),
+(10, 3, 70098.00, '2025-02-03 10:11:17.341'),
+(11, 6, 67827.00, '2025-02-02 19:21:27.753'),
+(12, 5, 69871.00, '2025-02-05 17:54:17.453'),
+(13, 2, 72984.00, '2025-03-05 09:37:35.974'),
+(14, 1, 67982.00, '2025-03-01 06:09:51.983'),
+(15, 6, 70198.00, '2025-03-02 10:34:35.753'),
+(16, 4, 74998.00, '2025-03-02 09:27:26.162');
+```java
+// src/main/java/com/example/webhookchallenge/WebhookChallengeApplication.java
+package com.example.webhookchallenge;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class WebhookChallengeApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(WebhookChallengeApplication.class, args);
+    }
+
+}
+```java
+// src/main/java/com/example/webhookchallenge/model/Department.java
+package com.example.webhookchallenge.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Entity
+@Table(name = "DEPARTMENT")
+@Data
+public class Department {
+    @Id
+    @Column(name = "DEPARTMENT_ID")
+    private Integer departmentId;
+
+    @Column(name = "DEPARTMENT_NAME")
+    private String departmentName;
+}
+```java
+// src/main/java/com/example/webhookchallenge/model/Employee.java
+package com.example.webhookchallenge.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "EMPLOYEE")
+@Data
+public class Employee {
+    @Id
+    @Column(name = "EMP_ID")
+    private Integer empId;
+
+    @Column(name = "FIRST_NAME")
+    private String firstName;
+
+    @Column(name = "\"LAST NAME\"")
+    private String lastName;
+
+    @Column(name = "DOB")
+    private LocalDate dob;
+
+    @Column(name = "GENDER")
+    private String gender;
+
+    @Column(name = "\"DEPARTMEN T\"")
+    private Integer departmentId;
+}
+```java
+// src/main/java/com/example/webhookchallenge/repository/EmployeeRepository.java
+package com.example.webhookchallenge.repository;
+
+import com.example.webhookchallenge.model.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
+}
+```java
+// src/main/java/com/example/webhookchallenge/dto/WebhookGenerationRequest.java
+package com.example.webhookchallenge.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class WebhookGenerationRequest {
+    private String name;
+    private String regNo;
+    private String email;
+}
+```java
+// src/main/java/com/example/webhookchallenge/dto/WebhookGenerationResponse.java
+package com.example.webhookchallenge.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+public class WebhookGenerationResponse {
+    @JsonProperty("challenge")
+    private ChallengeData challenge;
+
+    @Data
+    @NoArgsConstructor
+    public static class ChallengeData {
+        private String webhook;
+        private String accessToken;
+    }
+}
+```java
+// src/main/java/com/example/webhookchallenge/dto/SolutionSubmissionRequest.java
+package com.example.webhookchallenge.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SolutionSubmissionRequest {
+    @JsonProperty("finalQuery")
+    private String sqlQuery;
+}
+```java
+// src/main/java/com/example/webhookchallenge/service/AppStartupRunner.java
+package com.example.webhookchallenge.service;
+
+import com.example.webhookchallenge.dto.SolutionSubmissionRequest;
+import com.example.webhookchallenge.dto.WebhookGenerationRequest;
+import com.example.webhookchallenge.dto.WebhookGenerationResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+@Component
+public class AppStartupRunner implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(AppStartupRunner.class);
+    private final WebClient webClient;
+    private static final String GENERATE_WEBHOOK_URL = "[https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA](https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA)";
+
+    public AppStartupRunner() {
+        this.webClient = WebClient.builder()
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        logger.info("Application started. Beginning webhook generation process...");
+
+        WebhookGenerationRequest request = new WebhookGenerationRequest(
+                "Divansh Kothari",
+                "22BEC0788",
+                "divansh.kothari2022@vitstudent.ac.in"
+        );
+
+        generateWebhook(request)
+                .flatMap(response -> {
+                    String webhookUrl = response.getChallenge().getWebhook();
+                    String accessToken = response.getChallenge().getAccessToken();
+
+                    logger.info("Successfully received webhook URL: {}", webhookUrl);
+                    logger.info("Successfully received access token.");
+
+                    String sqlSolution = solveSqlProblem();
+                    logger.info("SQL problem solved. The solution query is: \n{}", sqlSolution);
+
+                    return submitSolution(webhookUrl, accessToken, new SolutionSubmissionRequest(sqlSolution));
+                })
+                .subscribe(
+                        result -> logger.info("Successfully submitted solution. Final response: {}", result),
+                        error -> logger.error("An error occurred during the process: ", error),
+                        () -> logger.info("Process completed successfully.")
+                );
+    }
+
+    private Mono<WebhookGenerationResponse> generateWebhook(WebhookGenerationRequest request) {
+        logger.info("Sending POST request to generate webhook at: {}", GENERATE_WEBHOOK_URL);
+        return webClient.post()
+                .uri(GENERATE_WEBHOOK_URL)
+                .body(Mono.just(request), WebhookGenerationRequest.class)
+                .retrieve()
+                .onStatus(status -> status.isError(), response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    logger.error("Error generating webhook. Status: {}, Body: {}", response.statusCode(), errorBody);
+                                    return Mono.error(new RuntimeException("Failed to generate webhook: " + errorBody));
+                                })
+                )
+                .bodyToMono(WebhookGenerationResponse.class);
+    }
+
+    private String solveSqlProblem() {
+        return "SELECT " +
+               "    e1.EMP_ID, " +
+               "    e1.FIRST_NAME, " +
+               "    e1.\"LAST NAME\", " +
+               "    d.DEPARTMENT_NAME, " +
+               "    (SELECT COUNT(*) " +
+               "     FROM EMPLOYEE e2 " +
+               "     WHERE e2.\"DEPARTMEN T\" = e1.\"DEPARTMEN T\" AND e2.DOB > e1.DOB) AS YOUNGER_EMPLOYEES_COUNT " +
+               "FROM " +
+               "    EMPLOYEE e1 " +
+               "JOIN " +
+               "    DEPARTMENT d ON e1.\"DEPARTMEN T\" = d.DEPARTMENT_ID " +
+               "ORDER BY " +
+               "    e1.EMP_ID DESC;";
+    }
+
+    private Mono<String> submitSolution(String webhookUrl, String token, SolutionSubmissionRequest solution) {
+        logger.info("Submitting solution to webhook URL: {}", webhookUrl);
+        return webClient.post()
+                .uri(webhookUrl)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(Mono.just(solution), SolutionSubmissionRequest.class)
+                .retrieve()
+                .onStatus(status -> status.isError(), response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    logger.error("Error submitting solution. Status: {}, Body: {}", response.statusCode(), errorBody);
+                                    return Mono.error(new RuntimeException("Failed to submit solution: " + errorBody));
+                                })
+                )
+                .bodyToMono(String.class);
+    }
+}
